@@ -21,7 +21,8 @@
         float:right;
       }
     </style>
-      <!-- chargement du fichier dat.json sensé contenir mes datas -->
+    <!-- appels au backend-->
+    <!-- appel api récupération des notes -->
     <iron-ajax       
                 
       id="fetchnotes"
@@ -30,7 +31,8 @@
       handle-as="json"
       on-response="_handleResponse"
       on-error="_error"></iron-ajax>
-
+    <!-- appel api ajout à la database -->
+    <!-- TODO: plancher sur l'ajout d'élément  -->
     <iron-ajax                
       id="createnotes"
       url="http://127.0.0.1:3000/notes/"
@@ -38,9 +40,9 @@
       body="{{displayedItem}}" 
       handle-as="json"
       on-error="_error"></iron-ajax>
-    <h2>Hello [[prop1]]!</h2> <!-- juste un test pour voir si le selection changed fonctionne bien-->
+    <h2>Selection Changed? :[[propSelectionChanged]]!</h2> <!-- juste un test pour voir si le selection changed fonctionne bien-->
 
-    <!-- Le tableau avec les datas-->
+  <!-- Le tableau avec les notes-->
   <div id="tabl">
     <paper-datatable ref="itemList" id="tableau" data="{{datatab}}" selectable selected-item="{{selectedItem}}" >
       <paper-datatable-column header="Title" property="title" style="width:20%;"  sortable></paper-datatable-column>
@@ -48,7 +50,7 @@
     </paper-datatable>
   </div>
   <!-- La datacard qui permet normalement de faire les modif, ne pas oublier de bien binder dans les deux sens avec {} -->
-  <!-- Le type date s'ecrit au format yyyy-mm-dd -->
+  <!-- Le type date s'ecrit au format yyyy-mm-dd  -->
   <div id="modifcard">
     <paper-card style="min-width:300px;margin:10px;" heading="Selected item">
       <div style="padding:0px 16px 16px 16px">
@@ -57,18 +59,16 @@
         <paper-input value="{{displayedItem.content}}" label="Content"></paper-input>
       </div>
     </paper-card>
-
-
-
-    <h3>[[selectedItem.id]]</h3>
-    <h3>[[prop2]]</h3>
+    <h3>[[propError]]</h3>
 
   </div>
   <div id="buttons">
-
-    <paper-button  on-click="_displayBlank">new</paper-button>
-    <paper-button  on-click="_saveNewData">save</paper-button>
-    <paper-button  on-click="_reload">Le Reload Button</paper-button>
+    <paper-button  on-click="_displayBlank">New</paper-button>
+    <!-- Sert à set l'element dans la card à un élément vide -->
+    <paper-button  on-click="_saveNewData">Save</paper-button>
+    <!-- Sert à savegarder les données contenues dans la Card (appel à l'API) -->
+    <paper-button  on-click="_reloadTable">Reload table</paper-button>
+    <!-- Sert à charger les données depuis le backend -->
     <paper-button  on-click="_loadData">Load Data</paper-button>
   </div>
 
@@ -86,30 +86,32 @@
       static get is() { return 'standalonedatatable-app'; }
       static get properties() {
         return {
-          prop1: {
+          propSelectionChanged: {
             type: String
           },
-          prop2: {
+          propError: {
             type: String,
-            value:"not clicked yet"
+            value:""
           },
           //les datas de base en cas de non-chargement 
           datatab:{
             type:Array,
-            value:[{id: 0, title:"T'as un soucis, t'as pas de data", calories: "Over 9000", fat: "lot", carbs: 24, protein: 4, sodium: 87, calcium:.14, iron: .01},
+            value:[{title:"T'as un soucis, t'as pas de data", content: "nothing to see here, no data loaded yet"}
                     ]
-                    ,
           },
-          //
+          //distinction entre l'objet affiché, l'objet selectionné, et les datatab recup depuis le backend et celle affichée (+ de flexibilité future)
+          //object selectionné par l'utilisateur dans la table
           selectedItem:{
             type:Object,
             observer:'_selectionChanged',
             value:{}
           },
+          //objet affiché dans la card de droite
           displayedItem:{
             type:Object,
             value:[{title:"",content:""}]
           },
+          //array qui contiendra les données récupérées du backend
           ajaxdatatab:{
             type:Array
           }
@@ -117,7 +119,7 @@
       }
       _selectionChanged(newValue, oldValue) // juste pour voir si ca se trigger bien
       {
-          this.prop1="Selection Changed";
+          this.propSelectionChanged="Selection Changed";
           this.displayedItem=this.selectedItem;
 
       }
@@ -134,26 +136,26 @@
         // faire bien attention à la propriété à aller rechercher (difference avec le codelabs, pas de .dat sur la response)
         this.ajaxdatatab=event.detail.response;
         this.datatab=this.ajaxdatatab;
-        this.prop1="response";
       }
-      _error(event)
+       
+      _error(event) //fonction appelée en cas d'erreur dans l'appel de l' API (voir les iron-ajax)
       {
-        this.prop2="Hum, ya un problème doc";
+        this.propError="Hum, ya un problème doc";
       }
       _displayBlank(event){
         this.displayedItem=[{title:"",content:""}];
-        this.prop1="Blank clicked"
+        //selection du tableau qui contient les datas et appel de sa fonction de désélection générale
         var x=this.shadowRoot.querySelector("#tableau");
         console.log(x);
         x.deselectAll();
       }
       _displaySave(event)
       {
-        this.displayedItem=[{title:"",calories:"",fat:"",carbs:"",protein:"",sodium:"",calcium:"",iron:""}];
+        //TODO: faire un appel au backend via l'API pour sauvegarder un nouvel élément
+        //penser à recharger la liste des notes
         
       }
-      _reload(event){
-        this.prop2="Reload";
+      _reloadTable(event){
         var x=this.shadowRoot.querySelector("#tableau");
         console.log(x);
         x.reload();
