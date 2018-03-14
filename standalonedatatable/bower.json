@@ -1,0 +1,15 @@
+{
+  "name": "standalonedatatable",
+  "main": "index.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^2.0.0",
+    "bwt-datatable": "^2.1.0",
+    "paper-input": "^2.1.1",
+    "paper-card": "PolymerElements/paper-card#^2.1.0",
+    "paper-button": "^2.1.0"
+  },
+  "devDependencies": {
+    "web-component-tester": "Polymer/web-component-tester#^6.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+  }
+}

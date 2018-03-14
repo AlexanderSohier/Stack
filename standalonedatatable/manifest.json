@@ -1,0 +1,6 @@
+{
+  "name": "standalonedatatable",
+  "short_name": "standalonedatatable",
+  "start_url": "/",
+  "display": "standalone"
+}
